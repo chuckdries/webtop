@@ -1,21 +1,47 @@
 const electron = require('electron');
-const {app, BrowserWindow} = electron;
+const { app, BrowserWindow } = electron;
+const { resolve } = require('path');
+const { homedir } = require('os');
+const { access, readFile } = require('fs');
+const { mergeDeepLeft } = require('ramda');
+
+const defaultConfig = require('./config-default');
+
+const userConfigPath = '~/.webtop/config.json';
 
 let mainWindow;
 
-function createBar() {
-  const { width, height } = electron.screen.getPrimaryDisplay().workAreaSize
+async function createBar() {
+  const { width } = electron.screen.getPrimaryDisplay().workAreaSize
+
+  const configExists = await new Promise((resolve) =>
+    access(resolveHome(userConfigPath), (err) => err && resolve(false) || resolve(true)));
+
+  let userConfig;
+  if (configExists) {
+    userConfig = await new Promise((resolve, reject) => 
+      readFile(resolveHome(userConfigPath), 'utf8', (err, data) => err && reject(err) || resolve(data)));
+    userConfig = JSON.parse(userConfig);
+  } else {
+    console.error('couldn\'t find user config, falling back to defaults');
+  }
+  
+
 
   mainWindow = new BrowserWindow({
     alwaysOnTop: true,
     frame: false,
     height: 50,
+    type: 'dock',
     width,
     x: 0,
     y: 0,
   });
 
-  mainWindow.loadFile('index.html');
+  const config = mergeDeepLeft(userConfig, defaultConfig);
+  console.log('config:', config);
+
+  mainWindow.loadFile(resolveHome(config.barUrl));
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -30,9 +56,9 @@ app.on('window-all-closed', () => {
   }
 })
 
-// this is mac shit
-// app.on('activate', () => {
-//   if (win === null) {
-//     createWindow()
-//   }
-// })
+function resolveHome(filePath) {
+  if(filePath[0] === '~') {
+    return resolve(homedir(), filePath.slice(2));
+  }
+  return resolve(filePath);
+}
