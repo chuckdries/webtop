@@ -26,8 +26,6 @@ async function createBar() {
     console.error('couldn\'t find user config, falling back to defaults');
   }
   
-
-
   mainWindow = new BrowserWindow({
     alwaysOnTop: true,
     frame: false,
@@ -38,10 +36,16 @@ async function createBar() {
     y: 0,
   });
 
+
   const config = mergeDeepLeft(userConfig, defaultConfig);
   console.log('config:', config);
 
-  mainWindow.loadFile(resolveHome(config.barUrl));
+  if(config.barUrl.slice(0,4) === 'http') {
+    mainWindow.loadURL(config.barUrl);
+  } else {
+    mainWindow.loadFile(resolveHome(config.barUrl));
+  }
+
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -50,15 +54,16 @@ async function createBar() {
 
 app.on('ready', createBar);
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
-
 function resolveHome(filePath) {
   if(filePath[0] === '~') {
     return resolve(homedir(), filePath.slice(2));
   }
-  return resolve(filePath);
+  return filePath;
+}
+
+function protocolForUrl(urlString) {
+  if(urlString[0] === '/') {
+    return 'file:/' + urlString;
+  }
+  return urlString;
 }
