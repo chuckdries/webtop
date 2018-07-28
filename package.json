@@ -1,5 +1,5 @@
 {
-  "name": "linux-webtop",
+  "name": "webtop",
   "version": "1.0.0",
   "description": "A linux bar, written in electron",
   "main": "main.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chuckdries/linux-webtop.git"
+    "url": "git+https://github.com/chuckdries/webtop.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chuckdries/linux-webtop/issues"
+    "url": "https://github.com/chuckdries/webtop/issues"
   },
-  "homepage": "https://github.com/chuckdries/linux-webtop#readme",
+  "homepage": "https://github.com/chuckdries/webtop#readme",
   "devDependencies": {
     "electron": "^3.0.0-beta.3"
   },
